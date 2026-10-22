@@ -22,26 +22,85 @@ st.set_page_config(
 # -------------------- Visual design --------------------
 st.markdown("""
 <style>
-  .block-container {max-width: 1180px; padding-top: 1.5rem; padding-bottom: 3rem;}
-  [data-testid="stAppViewContainer"] {background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 34%, #ffffff 100%);}
-  [data-testid="stHeader"] {background: transparent;}
-  .hero {padding: 1.6rem 1.8rem; border-radius: 24px; color: #ffffff;
+  :root {
+    color-scheme: light;
+    --tc-ink: #172033;
+    --tc-muted: #475569;
+    --tc-border: #cbd5e1;
+    --tc-panel: #ffffff;
+    --tc-control: #f8fafc;
+  }
+  html, body, [class*="css"], .stApp { color: var(--tc-ink) !important; }
+  .stApp { background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 35%, #ffffff 100%); }
+  [data-testid="stAppViewContainer"] { background: transparent; }
+  [data-testid="stHeader"] { background: rgba(255,255,255,.82); }
+  .block-container { max-width: 1180px; padding-top: 1.4rem; padding-bottom: 3rem; }
+  .stApp p, .stApp li, .stApp label, .stApp small,
+  .stApp [data-testid="stMarkdownContainer"],
+  .stApp [data-testid="stWidgetLabel"],
+  .stApp [data-testid="stWidgetLabel"] p,
+  .stApp [data-testid="stCaptionContainer"],
+  .stApp [data-testid="stCaptionContainer"] p,
+  .stApp [data-testid="stExpander"] summary {
+    color: var(--tc-ink) !important;
+    opacity: 1 !important;
+  }
+  .hero { padding: 1.55rem 1.8rem; border-radius: 22px; color: #ffffff !important;
           background: linear-gradient(120deg, #075985 0%, #0f766e 52%, #2563eb 100%);
-          box-shadow: 0 12px 30px rgba(15, 118, 110, .16); margin-bottom: 1rem;}
-  .hero h1 {margin: 0; font-size: 2.1rem; font-weight: 800; letter-spacing: -.035em; color: #ffffff;}
-  .hero p {margin: .55rem 0 0 0; font-size: 1rem; color: #e0f2fe;}
-  .pill {display:inline-block; padding:.25rem .65rem; border:1px solid rgba(255,255,255,.35);
-         border-radius:999px; font-size:.78rem; letter-spacing:.02em; margin-bottom:.6rem;}
-  .section-title {font-size:1.14rem; font-weight:750; color:#0f172a; margin:.25rem 0 .3rem 0;}
-  .muted {color:#64748b; font-size:.9rem;}
-  .mini-card {padding: .95rem 1rem; border:1px solid #dbeafe; background:#ffffff;
-               border-radius:16px; margin: .15rem 0 .6rem 0;}
-  .warning-card {padding:.85rem 1rem; background:#fff7ed; border:1px solid #fed7aa;
-                  border-radius:14px; color:#9a3412;}
-  div.stButton > button[kind="primaryFormSubmit"] {border-radius:12px; font-weight:700; min-height:3rem;}
-  div[data-testid="stForm"] {border:1px solid #dbeafe; border-radius:18px; padding:1.1rem; background:#ffffff;}
-  div[data-testid="stMetric"] {background:#ffffff; padding:1rem; border:1px solid #dbeafe; border-radius:16px;}
-  footer {visibility: hidden;}
+          box-shadow: 0 12px 30px rgba(15, 118, 110, .16); margin-bottom: 1rem; }
+  .hero, .hero * { color: #ffffff !important; }
+  .hero h1 { margin: 0; font-size: 2.1rem; font-weight: 800; letter-spacing: -.035em; line-height: 1.2; }
+  .hero p { margin: .65rem 0 0 0; font-size: 1rem; color: #eff6ff !important; line-height: 1.55; }
+  .pill { display:inline-block; padding:.32rem .7rem; border:1px solid rgba(255,255,255,.55);
+          border-radius:999px; font-size:.78rem; font-weight:700; letter-spacing:.02em; margin-bottom:.7rem; }
+  .section-title { font-size:1.15rem; font-weight:800; color:#0f172a !important; margin:.55rem 0 .35rem 0; }
+  .muted { color:#475569 !important; font-size:.94rem; line-height:1.55; }
+  .info-card { padding:.85rem 1rem; border:1px solid #bfdbfe; background:#eff6ff;
+               border-left:5px solid #2563eb; border-radius:12px; color:#1e293b !important;
+               line-height:1.55; margin:.3rem 0 .85rem 0; }
+  .info-card * { color:#1e293b !important; }
+  .mini-card { padding: 1rem 1.05rem; border:1px solid #cbd5e1; background:#ffffff;
+               border-radius:14px; margin: .15rem 0 .6rem 0; color:#172033 !important; line-height:1.55; }
+  .mini-card * { color:#172033 !important; }
+  .warning-card { padding:.9rem 1rem; background:#fff7ed; border:1px solid #fdba74;
+                  border-left:5px solid #ea580c; border-radius:13px; color:#7c2d12 !important;
+                  line-height:1.6; margin:.7rem 0 1rem 0; }
+  .warning-card * { color:#7c2d12 !important; }
+  div[data-testid="stForm"] { border:1px solid #cbd5e1; border-radius:16px; padding:1.05rem 1.1rem;
+                               background:#ffffff; box-shadow:0 4px 16px rgba(15,23,42,.045); }
+  div[data-testid="stWidgetLabel"], div[data-testid="stWidgetLabel"] p,
+  div[data-testid="stSelectbox"] label, div[data-testid="stNumberInput"] label {
+    color:#172033 !important; font-weight:700 !important; font-size:.94rem !important;
+  }
+  div[data-baseweb="select"] > div { background:#f8fafc !important; border:1px solid #94a3b8 !important;
+                                      min-height:2.75rem; }
+  div[data-baseweb="select"] *, div[data-baseweb="select"] span,
+  div[data-baseweb="select"] input { color:#111827 !important; opacity:1 !important; }
+  div[data-baseweb="select"] svg { fill:#334155 !important; }
+  div[data-testid="stNumberInput"] input { background:#f8fafc !important; color:#111827 !important;
+                                             border:1px solid #94a3b8 !important; min-height:2.75rem; }
+  div[data-testid="stNumberInput"] button { color:#1e293b !important; background:#e2e8f0 !important; }
+  div[data-testid="stMetric"] { background:#ffffff; padding:1rem; border:1px solid #cbd5e1;
+                                  border-radius:14px; }
+  div[data-testid="stMetric"] label, div[data-testid="stMetric"] [data-testid="stMetricValue"] { color:#172033 !important; }
+  div.stButton > button, div[data-testid="stFormSubmitButton"] button {
+    border-radius:11px !important; font-weight:750 !important; min-height:3rem;
+    font-size:1rem !important; border:1px solid #b91c1c !important;
+    background:#dc2626 !important; color:#ffffff !important;
+  }
+  div.stButton > button:hover, div[data-testid="stFormSubmitButton"] button:hover {
+    background:#b91c1c !important; border-color:#991b1b !important; color:#ffffff !important;
+  }
+  [data-testid="stProgressBar"] { margin-top:.35rem; }
+  [data-testid="stDataFrame"] { border:1px solid #cbd5e1; border-radius:10px; overflow:hidden; }
+  [data-testid="stAlert"] { border-radius:12px; }
+  footer { visibility: hidden; }
+  @media (max-width: 700px) {
+    .block-container { padding: 1rem .75rem 2rem .75rem; }
+    .hero { padding:1.2rem 1.1rem; border-radius:16px; }
+    .hero h1 { font-size:1.75rem; }
+    div[data-testid="stForm"] { padding:.8rem; }
+  }
 </style>
 """, unsafe_allow_html=True)
 
@@ -74,13 +133,23 @@ except Exception as exc:
     st.error(f"The app could not load the model or metadata: {type(exc).__name__}: {exc}")
     st.stop()
 
-st.caption("Primary research track excludes post-treatment `Response` and derived `Stage`. Patient identifiers and photos are not prediction features and are not saved by this app.")
+st.markdown(
+    '<div class="info-card"><b>Model scope:</b> This research track excludes post-treatment response and derived stage variables. '
+    'Patient identifiers and photos are not prediction features.</div>',
+    unsafe_allow_html=True,
+)
 
 st.markdown('<div class="section-title">01 · Privacy-conscious research input</div>', unsafe_allow_html=True)
-st.markdown('This prototype does not collect names, patient identifiers, national ID numbers, or images. Use synthetic or appropriately de-identified data only.')
-st.divider()
+st.markdown(
+    '<div class="info-card">This prototype does not ask for names, patient identifiers, national ID numbers, or images. '
+    '<b>Use synthetic or appropriately de-identified data only.</b></div>',
+    unsafe_allow_html=True,
+)
 st.markdown('<div class="section-title">02 · Research model inputs</div>', unsafe_allow_html=True)
-st.markdown('<div class="muted">Enter values for the available clinical variables. The patient ID, NID and photo are excluded from the model input.</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="muted">Enter the values requested below. Patient ID, NID, and photo are not used as model inputs.</div>',
+    unsafe_allow_html=True,
+)
 
 with st.form("patient_inputs", clear_on_submit=False):
     row = {}
