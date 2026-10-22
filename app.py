@@ -253,12 +253,60 @@ if submitted:
                     feature_names = [f"Encoded feature {i+1}" for i in range(len(shap_row))]
                 if len(feature_names) != len(shap_row):
                     feature_names = [f"Encoded feature {i+1}" for i in range(len(shap_row))]
-                contributions = pd.DataFrame({"Feature": feature_names, "SHAP contribution": shap_row})
+                # Map one-hot encoded SHAP values back to their original clinical fields.
+                # Summing a field's encoded-column attributions preserves its net local contribution.
+                raw_features = list(feature_columns)
+                def _original_clinical_feature(encoded_name):
+                    name = str(encoded_name)
+                    # ColumnTransformer prefixes commonly look like "categorical__Risk_Low".
+                    base_name = name.split("__", 1)[-1]
+                    # Longest-first avoids ambiguous prefixes if feature names overlap.
+                    for raw_name in sorted(raw_features, key=len, reverse=True):
+                        if base_name == raw_name or base_name.startswith(raw_name + "_"):
+                            return raw_name
+                    return base_name
+
+                encoded_contributions = pd.DataFrame({
+                    "Encoded feature": feature_names,
+                    "Clinical feature": [_original_clinical_feature(n) for n in feature_names],
+                    "SHAP contribution": np.asarray(shap_row, dtype=float),
+                })
+                contributions = (
+                    encoded_contributions.groupby("Clinical feature", as_index=False, sort=False)["SHAP contribution"]
+                    .sum()
+                )
                 contributions["absolute_contribution"] = contributions["SHAP contribution"].abs()
-                contributions = contributions.sort_values("absolute_contribution", ascending=False).head(8).drop(columns="absolute_contribution")
+                contributions = contributions.sort_values("absolute_contribution", ascending=False).head(10)
                 st.subheader("Local explanation · SHAP")
-                st.caption("Explains how this model behaved for this input; it does not explain causality or prove clinical risk factors.")
-                st.dataframe(contributions, use_container_width=True, hide_index=True)
+                st.caption("One-hot encoded contributions are combined by original clinical field. Positive values push the model output toward the recurrence class; negative values push it away. These are model attributions, not causal effects or clinical risk factors.")
+
+                # Accessible horizontal plot: teal bars are positive, amber bars negative.
+                import matplotlib.pyplot as plt
+                plot_data = contributions.sort_values("SHAP contribution", ascending=True).copy()
+                fig_height = max(3.2, 0.48 * len(plot_data) + 1.1)
+                fig, ax = plt.subplots(figsize=(8.2, fig_height))
+                bar_colors = ["#d97706" if value < 0 else "#0f766e" for value in plot_data["SHAP contribution"]]
+                ax.barh(plot_data["Clinical feature"], plot_data["SHAP contribution"], color=bar_colors, height=0.68)
+                ax.axvline(0, color="#64748b", linewidth=1)
+                ax.set_xlabel("Net SHAP contribution")
+                ax.set_ylabel("")
+                ax.set_title("Local contribution by clinical feature", loc="left", fontsize=12, pad=10)
+                ax.grid(axis="x", linestyle=":", linewidth=0.7, alpha=0.35)
+                ax.set_axisbelow(True)
+                ax.spines["top"].set_visible(False)
+                ax.spines["right"].set_visible(False)
+                ax.spines["left"].set_color("#cbd5e1")
+                ax.spines["bottom"].set_color("#cbd5e1")
+                fig.tight_layout()
+                st.pyplot(fig, use_container_width=True)
+                plt.close(fig)
+                st.dataframe(
+                    contributions[["Clinical feature", "SHAP contribution"]].rename(
+                        columns={"SHAP contribution": "Net SHAP contribution"}
+                    ),
+                    use_container_width=True,
+                    hide_index=True,
+                )
             except Exception as exc:
                 st.info(f"Local SHAP explanation could not be generated ({type(exc).__name__}). The score above is independent of this optional explanation. Check the deployment logs if this persists.")
 
