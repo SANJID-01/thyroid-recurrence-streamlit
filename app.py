@@ -308,7 +308,7 @@ if submitted:
                     hide_index=True,
                 )
             except Exception as exc:
-                st.info(f"Local SHAP explanation could not be generated ({type(exc).__name__}). The score above is independent of this optional explanation. Check the deployment logs if this persists.")
+                st.info(f"Local SHAP explanation could not be generated ({type(exc).__name__}: {exc}). The score above is independent of this optional explanation. Check the deployment logs if this persists.")
 
             st.markdown('<div class="warning-card"><b>Next step:</b> A qualified clinician must review the patient independently. This app does not give diagnosis, treatment, or follow-up advice.</div>', unsafe_allow_html=True)
         except Exception as exc:

@@ -5,3 +5,4 @@ scikit-learn==1.6.1
 imbalanced-learn==0.14.2
 joblib==1.6.0
 shap==0.47.2
+matplotlib==3.9.4
