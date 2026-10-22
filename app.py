@@ -88,9 +88,30 @@ st.markdown("""
     font-size:1rem !important; border:1px solid #b91c1c !important;
     background:#dc2626 !important; color:#ffffff !important;
   }
-  div.stButton > button:hover, div[data-testid="stFormSubmitButton"] button:hover {
+  div.stButton > button:hover, div[data-testid="stFormSubmitButton"] button:hover,
+  div.stButton > button:hover *, div[data-testid="stFormSubmitButton"] button:hover * {
     background:#b91c1c !important; border-color:#991b1b !important; color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
   }
+  /* Streamlit versions may style the button's inner paragraph separately. */
+  div.stButton > button, div.stButton > button *,
+  div[data-testid="stFormSubmitButton"] button,
+  div[data-testid="stFormSubmitButton"] button * {
+    color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; opacity:1 !important;
+  }
+  /* Enforce the light form theme even when the browser or Cloud theme is dark. */
+  [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+    background:#f8fafc !important; color:#111827 !important; border-color:#94a3b8 !important;
+  }
+  [data-testid="stSelectbox"] [data-baseweb="select"] * {
+    color:#111827 !important; -webkit-text-fill-color:#111827 !important; opacity:1 !important;
+  }
+  [data-testid="stExpander"] details, [data-testid="stExpander"] details > summary,
+  [data-testid="stExpander"] details > summary *, [data-testid="stExpander"] summary p {
+    background:#ffffff !important; color:#172033 !important; -webkit-text-fill-color:#172033 !important;
+    opacity:1 !important;
+  }
+  [data-testid="stExpander"] details { border:1px solid #cbd5e1 !important; border-radius:12px !important; }
   [data-testid="stProgressBar"] { margin-top:.35rem; }
   [data-testid="stDataFrame"] { border:1px solid #cbd5e1; border-radius:10px; overflow:hidden; }
   [data-testid="stAlert"] { border-radius:12px; }
@@ -198,10 +219,10 @@ if submitted:
             st.markdown('<div class="section-title">03 · Research model output</div>', unsafe_allow_html=True)
             out_left, out_right = st.columns([1, 1], gap="large")
             with out_left:
-                st.metric("Model-estimated recurrence score", f"{score:.1%}")
-                st.progress(score, text="Model score visualisation only — not a clinical risk category")
+                st.metric("Unvalidated model recurrence score", f"{score:.1%}")
+                st.progress(score, text="Research model output only — not a validated clinical probability")
             with out_right:
-                st.markdown('<div class="mini-card"><b>Interpretation boundary</b><br><span class="muted">This number reflects the model output for the entered values. It is not a diagnosis, validated individual prognosis, or treatment recommendation.</span></div>', unsafe_allow_html=True)
+                st.markdown('<div class="mini-card"><b>Interpretation boundary</b><br><span class="muted">This is the model score for the entered values, not a validated real-world recurrence probability. It is not a diagnosis, individual prognosis, or treatment recommendation.</span></div>', unsafe_allow_html=True)
 
             # Optional local SHAP. Failure is reported as unavailable, never as zero contribution.
             try:
@@ -239,7 +260,7 @@ if submitted:
                 st.caption("Explains how this model behaved for this input; it does not explain causality or prove clinical risk factors.")
                 st.dataframe(contributions, use_container_width=True, hide_index=True)
             except Exception as exc:
-                st.info(f"Local SHAP explanation is unavailable in this run ({type(exc).__name__}). The model score above is independent of this optional explanation.")
+                st.info(f"Local SHAP explanation could not be generated ({type(exc).__name__}). The score above is independent of this optional explanation. Check the deployment logs if this persists.")
 
             st.markdown('<div class="warning-card"><b>Next step:</b> A qualified clinician must review the patient independently. This app does not give diagnosis, treatment, or follow-up advice.</div>', unsafe_allow_html=True)
         except Exception as exc:
@@ -247,10 +268,11 @@ if submitted:
             st.info("Check that the model artifact, metadata, feature names, categorical values, and package versions all match the notebook that generated them.")
 
 st.divider()
-with st.expander("About this prototype and data handling"):
-    st.write("Dataset:", meta.get("dataset", "Not specified"))
-    st.write("Target column:", meta.get("target", "Not specified"))
-    st.write("Model feature columns:", ", ".join(meta.get("feature_columns", [])))
+st.markdown('<div class="section-title">About this prototype and data handling</div>', unsafe_allow_html=True)
+with st.container(border=True):
+    st.write("**Dataset:**", meta.get("dataset", "Not specified"))
+    st.write("**Target column:**", meta.get("target", "Not specified"))
+    st.write("**Model feature columns:**", ", ".join(meta.get("feature_columns", [])))
     st.write("This prototype is intended for synthetic or appropriately de-identified research inputs only. A hosted app processes entered values in memory; do not enter identifiable patient information without institutional approval, access controls, secure hosting, and an approved data-governance plan.")
     st.write("This is a research software prototype. It has not been externally or prospectively validated and is not approved for clinical use.")
 
